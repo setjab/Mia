@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeg Savner Min Kollega</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        #circle-container {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .circle {
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 3s forwards 5s;
+        }
+        #center-circle {
+            width: 320px;
+            height: 320px;
+            font-size: 40px;
+            background-color: yellow;
+            color: black;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes moveToCircle {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(var(--x), var(--y)); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bigbang"></canvas>
+    <div id="circle-container">
+        <div id="center-circle" class="circle">Mia</div>
+        <div class="circle" id="circle-1" style="background-color: red;">Jeg</div>
+        <div class="circle" id="circle-2" style="background-color: blue;">Savner</div>
+        <div class="circle" id="circle-3" style="background-color: green;">Min</div>
+        <div class="circle" id="circle-4" style="background-color: purple;">Kollega</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("bigbang");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = ["red", "orange", "yellow", "green", "blue", "purple", "white"];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 6 + 2;
+                this.color = color;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.radius -= 0.02;
+                if (this.radius < 0) this.radius = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function createBigBang() {
+            for (let i = 0; i < 300; i++) {
+                const x = canvas.width / 2;
+                const y = canvas.height / 2;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((particle, index) => {
+                if (particle.radius <= 0) {
+                    particles[index] = new Particle(canvas.width / 2, canvas.height / 2, particle.color);
+                } else {
+                    particle.update();
+                    particle.draw();
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function animateCircles() {
+            const positions = [
+                { x: "0px", y: "-300px" },  // Øverst
+                { x: "0px", y: "300px" },   // Nederst
+                { x: "-300px", y: "0px" },  // Venstre
+                { x: "300px", y: "0px" }    // Høyre
+            ];
+            document.querySelectorAll(".circle").forEach((circle, index) => {
+                if (index === 0) return; // Hopp over midten
+                circle.style.opacity = "1";
+                circle.style.animation = `moveToCircle 3s forwards`;
+                circle.style.setProperty("--x", positions[index - 1].x);
+                circle.style.setProperty("--y", positions[index - 1].y);
+            });
+        }
+
+        createBigBang();
+        animate();
+        setTimeout(animateCircles, 5000);
+    </script>
+</body>
+</html>
